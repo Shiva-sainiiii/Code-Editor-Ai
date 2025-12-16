@@ -244,3 +244,26 @@ setTimeout(()=>{
   updateLines();
   setCaretToEnd();
 },100);
+
+/* ================= Insert Generated Code at Caret ================= */
+
+function insertTextAtCursor(text){
+  const pos = getCaretOffset();
+  const full = getCode();
+
+  const before = full.slice(0, pos);
+  const after  = full.slice(pos);
+
+  setCode(before + text + after);
+  setCaretByOffset(pos + text.length);
+  scheduleSave();
+}
+
+function insertGeneratedCodeAtCaret(code){
+  let chunk = code;
+
+  if(!chunk.startsWith("\n")) chunk = "\n" + chunk;
+  if(!chunk.endsWith("\n")) chunk = chunk + "\n";
+
+  insertTextAtCursor(chunk);
+}
