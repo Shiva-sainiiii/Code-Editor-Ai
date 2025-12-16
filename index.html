@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shiva Code Editor — AI Integrated</title>
+
+  <!-- Main Styles -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <!-- TOP BUTTONS -->
+  <div class="top-buttons" role="toolbar" aria-label="editor actions">
+    <button onclick="runPreview()">Preview</button>
+    <button onclick="openFile()">Open</button>
+    <button onclick="clearEditor()">Clear</button>
+    <button onclick="saveFile()">Save</button>
+    <button onclick="copyCode()">Copy</button>
+  </div>
+
+  <!-- EDITOR -->
+  <div class="editor-wrapper">
+
+    <!-- Line Numbers -->
+    <div id="lineNumbers" class="line-numbers">1</div>
+
+    <!-- Code Area -->
+    <div
+      id="codeArea"
+      class="code-area"
+      contenteditable="true"
+      spellcheck="false"
+      aria-label="code editor">
+    </div>
+
+    <!-- Suggest Box -->
+    <div id="suggestBox" class="suggest-box"></div>
+  </div>
+
+  <!-- BOTTOM BUTTONS -->
+  <div class="bottom-buttons" role="toolbar" aria-label="editor controls">
+    <button onclick="fontPlus()">Zoom +</button>
+    <button onclick="fontMinus()">Zoom -</button>
+    <button onclick="toggleWrap()">Wrap</button>
+    <button onclick="undo()">Undo</button>
+    <button onclick="redo()">Redo</button>
+  </div>
+
+  <!-- AI FLOAT BUTTON -->
+  <button class="ai-button" onclick="openAIPanel()">AI ⚡</button>
+
+  <!-- AI PANEL -->
+  <div id="aiPanel" class="ai-panel" aria-hidden="true" role="dialog">
+
+    <!-- Header -->
+    <div class="ai-header">
+      <div class="left">
+        <div id="dragHandle" class="drag-handle"></div>
+        <div class="ai-tabs">
+          <button id="tabAnalyze" class="tab active" onclick="showAnalyze()">Analyze</button>
+          <button id="tabConvert" class="tab" onclick="showConvert()">Text → Code</button>
+        </div>
+      </div>
+      <div class="ai-controls">
+        <button class="ai-clear" onclick="clearAiChat()">Clear Chat</button>
+        <button class="ai-close" onclick="closeAIPanel()">×</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="ai-content-wrapper">
+
+      <!-- Analyze Page -->
+      <div id="pageAnalyze" class="ai-page">
+
+        <div class="ai-action-row">
+          <button class="action" onclick="analyzeCode()">Analyze Code</button>
+          <button class="action secondary" onclick="copyAIOutput()">Copy Output</button>
+        </div>
+
+        <div id="aiOutput" class="ai-output"></div>
+
+        <div class="ai-input-area">
+          <input id="aiInput" type="text" placeholder="Ask AI…" />
+          <button onclick="sendAI()">Send</button>
+        </div>
+      </div>
+
+      <!-- Convert Page -->
+      <div id="pageConvert" class="ai-page" style="display:none;">
+        <div class="convert-area">
+          <div class="convert-controls">
+            <button onclick="convertTextToCode(false)">Convert → Insert</button>
+            <button onclick="convertTextToCode(true)" class="preview-btn">Preview Only</button>
+          </div>
+          <textarea
+            id="convertPrompt"
+            placeholder="eg. write html boilerplate code">
+          </textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Hidden paste helper -->
+  <textarea
+    id="pasteHelper"
+    style="position:fixed;left:-9999px;top:-9999px;opacity:0;">
+  </textarea>
+
+  <!-- JS FILES (ORDER MATTERS) -->
+  <script src="js/editor.js"></script>
+  <script src="js/ai-ui.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>>>>>
