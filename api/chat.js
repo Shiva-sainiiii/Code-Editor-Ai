@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         "X-Title": "Shiva Code Editor"
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-r1:free", 
+        model: "nvidia/nemotron-3-super-120b-a12b:free", 
         messages: messages,
         temperature: temperature,
         top_p: 0.9,
