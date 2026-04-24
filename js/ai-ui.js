@@ -1,160 +1,112 @@
-/* ================= AI PANEL UI ================= */
+/* ============================================================
+   SHIVA EDITOR - AI PANEL UI
+   ============================================================ */
 
-const aiPanel   = document.getElementById("aiPanel");
-const aiOutput  = document.getElementById("aiOutput");
-const aiInput   = document.getElementById("aiInput");
-const dragHandle = document.getElementById("dragHandle");
+const aiPanel = document.getElementById("aiPanel");
+const aiOutput = document.getElementById("aiOutput");
+const aiInput = document.getElementById("aiInput");
 
-/* ---------- Open / Close ---------- */
-function openAIPanel(){
+function openAIPanel() {
   aiPanel.classList.add("open");
-  aiPanel.setAttribute("aria-hidden","false");
+  aiPanel.setAttribute("aria-hidden", "false");
   aiInput.focus();
-  showAnalyze();
 }
 
-function closeAIPanel(){
+function closeAIPanel() {
   aiPanel.classList.remove("open");
-  aiPanel.setAttribute("aria-hidden","true");
+  aiPanel.setAttribute("aria-hidden", "true");
 }
 
-function clearAiChat(){
-  aiOutput.innerHTML = "";
-  aiOutput.scrollTop = 0;
-  showAnalyze();
-}
-
-/* ---------- Tabs ---------- */
-function showAnalyze(){
-  document.getElementById("pageAnalyze").style.display = "block";
+function showAnalyze() {
+  document.getElementById("pageAnalyze").style.display = "flex";
   document.getElementById("pageConvert").style.display = "none";
   document.getElementById("tabAnalyze").classList.add("active");
   document.getElementById("tabConvert").classList.remove("active");
 }
 
-function showConvert(){
+function showConvert() {
   document.getElementById("pageAnalyze").style.display = "none";
-  document.getElementById("pageConvert").style.display = "block";
+  document.getElementById("pageConvert").style.display = "flex";
   document.getElementById("tabAnalyze").classList.remove("active");
   document.getElementById("tabConvert").classList.add("active");
 }
 
-/* ---------- Messages ---------- */
-function appendUserMsg(text){
-  const wrap = document.createElement("div");
-  wrap.className = "msg";
-  wrap.innerHTML = `
-    <span class="who">You</span>
-    <div class="ai-msg">${escapeHtml(text)}</div>
-  `;
-  aiOutput.appendChild(wrap);
+function clearAiChat() {
+  aiOutput.innerHTML = `
+    <div class="welcome-msg">
+      <i class="ph ph-robot"></i>
+      <p>Chat cleared. How can I help you with your code?</p>
+    </div>`;
+}
+
+/* ---------- Message Rendering ---------- */
+function appendUserMsg(text) {
+  const div = document.createElement("div");
+  div.className = "msg user-msg-wrap";
+  div.innerHTML = `<span class="who">You</span><div class="ai-msg user-bubble">${escapeHtml(text)}</div>`;
+  aiOutput.appendChild(div);
+  scrollToBottom();
+}
+
+function appendAIPlaceholder() {
+  const div = document.createElement("div");
+  div.className = "msg ai-msg-wrap";
+  div.innerHTML = `<span class="who">AI Assistant</span><div class="ai-msg typing"><span>.</span><span>.</span><span>.</span></div>`;
+  aiOutput.appendChild(div);
+  scrollToBottom();
+  return div.querySelector(".ai-msg");
+}
+
+function scrollToBottom() {
   aiOutput.scrollTop = aiOutput.scrollHeight;
 }
 
-function appendAIPlaceholder(){
-  const wrap = document.createElement("div");
-  wrap.className = "msg";
-  wrap.innerHTML = `
-    <span class="who">AI</span>
-    <div class="ai-msg">
-      <span class="typing">
-        AI is typing<span>.</span><span>.</span><span>.</span>
-      </span>
-    </div>
-  `;
-  aiOutput.appendChild(wrap);
-  aiOutput.scrollTop = aiOutput.scrollHeight;
-  return wrap;
+/* ---------- Dragging Logic ---------- */
+let isDragging = false;
+let currentY;
+let initialY;
+let yOffset = 0;
+
+const dragHandle = document.getElementById("dragHandle");
+
+dragHandle.addEventListener("touchstart", dragStart, false);
+dragHandle.addEventListener("touchend", dragEnd, false);
+dragHandle.addEventListener("touchmove", drag, false);
+
+dragHandle.addEventListener("mousedown", dragStart, false);
+document.addEventListener("mousemove", drag, false);
+document.addEventListener("mouseup", dragEnd, false);
+
+function dragStart(e) {
+  if (e.type === "touchstart") {
+    initialY = e.touches[0].clientY - yOffset;
+  } else {
+    initialY = e.clientY - yOffset;
+  }
+  isDragging = true;
 }
 
-function appendAIText(text, placeholder){
-  const node = placeholder || appendAIPlaceholder();
-  node.querySelector(".ai-msg").innerHTML = renderReplyToHtml(text);
-  aiOutput.scrollTop = aiOutput.scrollHeight;
-}
-
-/* ---------- Markdown-safe Renderer ---------- */
-function renderReplyToHtml(md){
-  if(!md) return "";
-
-  const fence = /```(?:([\w+-]+)\n)?([\s\S]*?)```/g;
-  let out = md.replace(fence, (_,lang,code)=>{
-    return `<pre><code>${escapeHtml(code)}</code></pre>`;
-  });
-
-  const parts = out.split(/(<pre><code>[\s\S]*?<\/code><\/pre>)/g);
-  for(let i=0;i<parts.length;i++){
-    if(!parts[i].startsWith("<pre><code>")){
-      parts[i] = escapeHtml(parts[i]).replace(/\n/g,"<br>");
+function drag(e) {
+  if (isDragging) {
+    e.preventDefault();
+    if (e.type === "touchmove") {
+      currentY = e.touches[0].clientY - initialY;
+    } else {
+      currentY = e.clientY - initialY;
+    }
+    // Only allow dragging upwards (negative Y)
+    if (currentY < 0) {
+      yOffset = currentY;
+      aiPanel.style.transform = `translate(-50%, ${currentY}px)`;
     }
   }
-  return parts.join("");
 }
 
-/* ---------- Copy AI Output ---------- */
-function copyAIOutput(){
-  navigator.clipboard.writeText(aiOutput.innerText || "");
+function dragEnd() {
+  isDragging = false;
+  // If dragged significantly down, close it
+  if (yOffset > 100) closeAIPanel();
+  // Reset transform to allow CSS transitions to take over
+  aiPanel.style.transform = "";
+  yOffset = 0;
 }
-
-/* ---------- Add copy buttons to code blocks ---------- */
-function addCopyButtons(){
-  document.querySelectorAll(".ai-msg pre").forEach(pre=>{
-    if(pre.querySelector(".copy-btn")) return;
-
-    const code = pre.querySelector("code");
-    if(!code) return;
-
-    const btn = document.createElement("button");
-    btn.className = "copy-btn";
-    btn.textContent = "Copy";
-
-    btn.onclick = ()=>{
-      navigator.clipboard.writeText(code.innerText);
-      btn.textContent = "Copied!";
-      setTimeout(()=> btn.textContent="Copy",1500);
-    };
-
-    pre.appendChild(btn);
-  });
-}
-
-/* ---------- Drag AI Panel ---------- */
-(function(){
-  let dragging=false,startY=0,startBottom=0;
-  const header=document.querySelector(".ai-header");
-
-  function start(e){
-    dragging=true;
-    startY=(e.touches?e.touches[0].clientY:e.clientY);
-    const r=aiPanel.getBoundingClientRect();
-    startBottom=window.innerHeight-r.bottom;
-    document.body.style.userSelect="none";
-  }
-
-  function move(e){
-    if(!dragging) return;
-    const y=(e.touches?e.touches[0].clientY:e.clientY);
-    const dy=y-startY;
-    aiPanel.style.bottom=Math.max(0,startBottom-dy)+"px";
-  }
-
-  function end(){
-    dragging=false;
-    document.body.style.userSelect="";
-  }
-
-  dragHandle.addEventListener("mousedown",start);
-  header.addEventListener("mousedown",start);
-  window.addEventListener("mousemove",move);
-  window.addEventListener("mouseup",end);
-
-  dragHandle.addEventListener("touchstart",start);
-  header.addEventListener("touchstart",start);
-  window.addEventListener("touchmove",move,{passive:false});
-  window.addEventListener("touchend",end);
-})();
-
-/* ---------- ESC to close ---------- */
-document.addEventListener("keydown",e=>{
-  if(e.key==="Escape") closeAIPanel();
-});
