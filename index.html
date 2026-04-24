@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Shiva Code Editor — Professional AI IDE</title>
+  <title>Shiva Editor — Professional AI IDE</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,100 +28,66 @@
       <button onclick="openFile()" title="Open File">
         <i class="ph ph-folder-open"></i> <span>Open</span>
       </button>
-      <button onclick="saveFile()" title="Save File">
+      <button onclick="saveFile()" title="Download File">
         <i class="ph ph-floppy-disk"></i> <span>Save</span>
-      </button>
-      <button onclick="copyCode()" title="Copy All">
-        <i class="ph ph-copy"></i>
-      </button>
-      <button onclick="clearEditor()" class="btn-danger" title="Clear All">
-        <i class="ph ph-trash"></i>
       </button>
     </nav>
   </header>
 
-  <main class="main-container">
-    <section class="editor-wrapper">
-      <div id="lineNumbers" class="line-numbers">1</div>
-
-      <div id="codeArea" 
-           class="code-area" 
-           contenteditable="true" 
-           spellcheck="false" 
-           aria-label="Code editor"></div>
-      
-      <div id="suggestBox" class="suggest-box"></div>
-    </section>
-
-    <footer class="status-bar">
-      <div class="status-left">
-        <span id="cursorPos">Ln 1, Col 1</span>
-      </div>
-      <div class="status-right">
-        <span>UTF-8</span>
-        <span class="lang-tag">HTML / JS</span>
-        <div class="connection-dot"></div>
-      </div>
-    </footer>
+  <main class="editor-container">
+    <div id="lineNumbers" class="line-numbers">1</div>
+    <div id="codeArea" class="code-editor" contenteditable="true" spellcheck="false" autocomplete="off">
+      <div class="code-line"></div>
+    </div>
+    
+    <div id="suggestBox" class="suggestion-box" style="display:none;"></div>
   </main>
 
-  <aside class="bottom-toolbar">
-    <div class="button-group">
-      <button onclick="fontMinus()" title="Zoom Out"><i class="ph ph-magnifying-glass-minus"></i></button>
-      <button onclick="fontPlus()" title="Zoom In"><i class="ph ph-magnifying-glass-plus"></i></button>
+  <footer class="status-bar">
+    <div class="status-left">
+      <span class="status-item"><i class="ph ph-file-code"></i> index.html</span>
+      <span id="cursorPos" class="status-item">Ln 1, Col 1</span>
     </div>
-    <div class="v-separator"></div>
-    <button onclick="toggleWrap()" id="wrapBtn" title="Toggle Word Wrap">
-      <i class="ph ph-text-wrap"></i>
+    <div class="status-right">
+      <span id="syncStatus" class="status-item"><i class="ph ph-cloud-check"></i> Cloud Synced</span>
+      <button onclick="toggleWrap()" id="wrapBtn" title="Toggle Word Wrap"><i class="ph ph-text-indent"></i></button>
+      <button onclick="fontMinus()"><i class="ph ph-minus"></i></button>
+      <button onclick="fontPlus()"><i class="ph ph-plus"></i></button>
+    </div>
+  </footer>
+
+  <aside class="side-tools">
+    <button onclick="openAIPanel()" class="tool-btn ai-trigger" title="AI Assistant">
+      <i class="ph-fill ph-sparkle"></i>
     </button>
-    <div class="v-separator"></div>
-    <div class="button-group">
-      <button onclick="undo()" title="Undo"><i class="ph ph-arrow-u-up-left"></i></button>
-      <button onclick="redo()" title="Redo"><i class="ph ph-arrow-u-up-right"></i></button>
-    </div>
+    <button onclick="analyzeCode()" class="tool-btn" title="Analyze Code">
+      <i class="ph ph-magnifying-glass"></i>
+    </button>
+    <button onclick="copyCode()" class="tool-btn" title="Copy All">
+      <i class="ph ph-copy"></i>
+    </button>
+    <button onclick="clearEditor()" class="tool-btn" title="Clear All">
+      <i class="ph ph-trash"></i>
+    </button>
   </aside>
 
-  <button class="ai-fab" aria-label="Open AI Assistant" onclick="openAIPanel()">
-    <div class="ai-icon-glow"></div>
-    <i class="ph-fill ph-sparkle"></i>
-    <span class="ai-label">AI Assistant</span>
-  </button>
-
-  <div id="aiPanel" class="ai-panel" aria-hidden="true" role="dialog">
+  <div id="aiPanel" class="ai-panel" aria-hidden="true">
+    <div id="dragHandle" class="drag-handle"></div>
+    
     <div class="ai-header">
-      <div id="dragHandle" class="drag-handle"></div>
-      <div class="ai-nav">
-        <div class="ai-tabs" role="tablist">
-          <button id="tabAnalyze" class="tab active" onclick="showAnalyze()">
-            <i class="ph ph-magnifying-glass"></i> Analyze
-          </button>
-          <button id="tabConvert" class="tab" onclick="showConvert()">
-            <i class="ph ph-code"></i> Generator
-          </button>
-        </div>
-        <div class="ai-actions">
-          <button class="icon-btn" onclick="clearAiChat()" title="Clear Chat"><i class="ph ph-eraser"></i></button>
-          <button class="icon-btn close-btn" onclick="closeAIPanel()"><i class="ph ph-x"></i></button>
-        </div>
+      <div class="ai-tabs">
+        <button id="tabAnalyze" class="tab-btn active" onclick="showAnalyze()">Chat & Analysis</button>
+        <button id="tabConvert" class="tab-btn" onclick="showConvert()">Code Generator</button>
       </div>
+      <button class="close-panel" onclick="closeAIPanel()"><i class="ph ph-x"></i></button>
     </div>
 
-    <div class="ai-content-wrapper">
-      
+    <div class="ai-body">
       <div id="pageAnalyze" class="ai-page">
-        <div class="ai-action-bar">
-          <button class="action-btn main" onclick="analyzeCode()">
-            <i class="ph ph-bug"></i> Find Bugs
-          </button>
-          <button class="action-btn" onclick="copyAIOutput()">
-            <i class="ph ph-copy-simple"></i> Copy Output
-          </button>
-        </div>
-        
-        <div id="aiOutput" class="ai-output" aria-live="polite">
+        <div id="aiOutput" class="ai-chat-area">
           <div class="welcome-msg">
             <i class="ph ph-robot"></i>
-            <p>Ready to analyze your code. Click "Find Bugs" or ask a question below.</p>
+            <p>I can help you debug, optimize, or explain your code. Click "Find Bugs" or ask a question below.</p>
           </div>
         </div>
 
@@ -153,15 +119,70 @@
           </div>
         </div>
       </div>
-      
     </div>
   </div>
 
   <textarea id="pasteHelper" style="position:fixed; left:-9999px; top:-9999px; opacity:0;"></textarea>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBeiIUdVEv5kvJ6GFSzWZwFav8Nx3Mxhkg",
+      authDomain: "code-editor-ai.firebaseapp.com",
+      projectId: "code-editor-ai",
+      storageBucket: "code-editor-ai.firebasestorage.app",
+      messagingSenderId: "145185559673",
+      appId: "1:145185559673:web:5646addc66bb365209b0a8",
+      measurementId: "G-CYWKWQJGP0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Global hooks so other scripts can access them
+    window.saveCloud = async (code) => {
+      const statusIcon = document.querySelector("#syncStatus i");
+      const statusText = document.querySelector("#syncStatus");
+      
+      try {
+        statusIcon.className = "ph ph-arrows-clockwise spinning"; // Animation placeholder
+        await setDoc(doc(db, "projects", "user_code"), {
+          content: code,
+          lastUpdated: new Date()
+        });
+        statusIcon.className = "ph ph-cloud-check";
+        statusText.innerHTML = `<i class="ph ph-cloud-check"></i> Cloud Synced`;
+      } catch (e) {
+        console.error("Firebase Save Error:", e);
+        statusIcon.className = "ph ph-cloud-warning";
+        statusText.innerHTML = `<i class="ph ph-cloud-warning"></i> Save Failed`;
+      }
+    };
+
+    window.loadCloud = async () => {
+      try {
+        const docSnap = await getDoc(doc(db, "projects", "user_code"));
+        return docSnap.exists() ? docSnap.data().content : null;
+      } catch (e) {
+        console.error("Firebase Load Error:", e);
+        return null;
+      }
+    };
+
+    // Auto-load on startup
+    window.addEventListener('load', async () => {
+      const cloudCode = await window.loadCloud();
+      if (cloudCode && window.setCode) {
+        window.setCode(cloudCode);
+      }
+    });
+  </script>
+
   <script src="js/editor.js"></script>
   <script src="js/ai-ui.js"></script>
   <script src="js/main.js"></script>
-
 </body>
-</html>
+  </html>
+          
